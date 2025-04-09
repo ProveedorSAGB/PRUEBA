@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        height: 100dvh;
+        font-family: "Arial", sans-serif;
+        text-align: center;
+      }
+      .arrow {
+        position: absolute;
+        bottom: 32px;
+        left: 0px;
+        width: 100px;
+        transform: rotate(30deg);
+      }
+      h1 {
+        font-size: 50px;
+      }
+      h1 span {
+        color: #acacac;
+        font-size: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      <span>I'm ready to work,</span><br />
+      Ask me anything.
+    </h1>
+    <img src="https://enzostvs-deepsite.hf.space/arrow.svg" class="arrow" />
+    <script></script>
+  </body>
+</html>
+<p>&nbsp;</p>
+<div id="matrixRain" class="matrix-rain">&nbsp;</div>
+<div class="matrix-bg">&nbsp;</div>
+<div class="container mx-auto px-4 py-8"><!-- Header --><header class="text-center mb-12">
+<h1 class="text-5xl md:text-6xl font-bold mb-4 glitch" style="text-align: center;" data-text="NeonFinance">NeoFinance</h1>
+<p class="text-xl text-gray-400" style="text-align: center;"><strong>Cuaderno Digital</strong></p>
+<p class="text-xl text-gray-400" style="text-align: center;">Seminario de Inversi&oacute;n y Mercados Financieros IPN</p>
+</header><!-- Main Content --> <!-- Tabs Navigation -->
+<div class="flex border-b border-gray-700 mb-6"><button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="intro"> Introducci&oacute;n </button> <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="apps"> Aplicaciones </button> <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="tasks"> Tareas </button> <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="slides"> Diapositivas </button></div>
+<!-- Tab Content -->
+<div id="tab-content"><!-- Introduction Tab -->
+<div id="intro" class="tab-pane active">
+<h2 class="text-2xl font-bold neon-text mb-4">📊 Introducci&oacute;n al Mundo Financiero</h2>
+<div class="grid md:grid-cols-2 gap-6">
+<div>
+<p class="mb-4">Bienvenido a <span class="neon-text">FinanzasDigital</span>, tu portal interactivo para dominar los conceptos financieros esenciales con un toque futurista 💹.</p>
+<p class="mb-4">Explora nuestras herramientas dise&ntilde;adas para ayudarte a tomar decisiones informadas sobre inversiones, ahorro y planificaci&oacute;n financiera 🚀.</p>
+<div class="neon-border p-4 rounded-lg mb-4">
+<h3 class="font-bold text-lg neon-text mb-2">💡 Conceptos Clave</h3>
+<ul class="list-disc pl-5 space-y-2">
+<li>Inter&eacute;s compuesto: El poder del tiempo en tus inversiones</li>
+<li>Diversificaci&oacute;n: No pongas todos tus huevos en una canasta</li>
+<li>Inflaci&oacute;n: El enemigo silencioso de tus ahorros</li>
+<li>Riesgo vs. Retorno: El equilibrio fundamental</li>
+</ul>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center">
+<div class="neon-border p-6 rounded-lg text-center">
+<p class="mb-4">"El dinero no es la meta, es la herramienta para alcanzar tus sue&ntilde;os"</p>
+<div class="animate-pulse"><span class="text-xs neon-text">Sistema financiero activado</span>
+<div class="flex justify-center mt-2">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Applications Tab -->
+<div id="apps" class="tab-pane hidden">
+<h2 class="text-2xl font-bold neon-text mb-6">🧮 Aplicaciones Financieras</h2>
+<div class="grid md:grid-cols-2 gap-8"><!-- Cetes Simulator -->
+<div class="neon-border p-6 rounded-lg">
+<h3 class="text-xl font-bold neon-text mb-4">📈 Simulador de CETES</h3>
+<div class="space-y-4">
+<div><label class="block mb-1">Monto a invertir ($)</label> <input id="investment" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" type="number" value="10000" /></div>
+<div><label class="block mb-1">Plazo (d&iacute;as)</label><select id="term" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500">
+<option value="28">28 d&iacute;as</option>
+<option selected="selected" value="91">91 d&iacute;as</option>
+<option value="182">182 d&iacute;as</option>
+<option value="364">364 d&iacute;as</option>
+</select></div>
+<div><label class="block mb-1">Tasa de inter&eacute;s anual (%)</label> <input id="rate" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" step="0.1" type="number" value="11.0" /></div>
+<div class="flex items-center"><input id="earlySale" class="mr-2" type="checkbox" /> <label for="earlySale">Simular venta anticipada</label></div>
+<div id="earlySaleContainer" class="hidden"><label class="block mb-1">D&iacute;as antes del vencimiento</label> <input id="earlyDays" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" min="1" type="number" value="7" /></div>
+<button id="calculateBtn" class="w-full py-2 neon-btn rounded-md font-medium"> Calcular </button></div>
+<div id="results" class="mt-6 hidden">
+<h4 class="font-bold neon-text mb-2">📊 Resultados</h4>
+<div class="bg-gray-800 rounded p-4">
+<div class="flex justify-between mb-2">Inter&eacute;s ganado:<span id="interest" class="font-bold neon-text">$0.00</span></div>
+<div class="flex justify-between mb-2">Monto final:<span id="finalAmount" class="font-bold neon-text">$0.00</span></div>
+<div id="earlySaleResult" class="flex justify-between mb-2">Monto con venta anticipada:<span id="earlyAmount" class="font-bold neon-text">$0.00</span></div>
+<div id="penaltyResult" class="flex justify-between">Penalizaci&oacute;n:<span id="penalty" class="font-bold text-red-400">$0.00</span></div>
+</div>
+</div>
+</div>
+<!-- Financial Tools -->
+<div>
+<div class="neon-border p-6 rounded-lg mb-6">
+<h3 class="text-xl font-bold neon-text mb-4">⚡ Herramientas R&aacute;pidas</h3>
+<div class="space-y-4">
+<div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
+<div class="flex items-center">
+<div>
+<h4 class="font-medium">Calculadora de inter&eacute;s compuesto</h4>
+<p class="text-sm text-gray-400">Proyecta el crecimiento de tus inversiones</p>
+</div>
+</div>
+</div>
+<div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
+<div class="flex items-center">
+<div>
+<h4 class="font-medium">Simulador de portafolios</h4>
+<p class="text-sm text-gray-400">Analiza diferentes estrategias de inversi&oacute;n</p>
+</div>
+</div>
+</div>
+<div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
+<div class="flex items-center">
+<div>
+<h4 class="font-medium">Comparador de instrumentos</h4>
+<p class="text-sm text-gray-400">Encuentra la mejor opci&oacute;n para tus necesidades</p>
+</div>
+</div>
+</div>
+<div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
+<div class="flex items-center">
+<div>
+<h4 class="font-medium">Evaluador de riesgo</h4>
+<p class="text-sm text-gray-400">Determina tu perfil de inversionista</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="neon-border p-4 rounded-lg text-center">
+<p class="text-sm">"El conocimiento financiero es la mejor inversi&oacute;n que puedes hacer"</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tasks Tab -->
+<div id="tasks" class="tab-pane hidden">
+<h2 class="text-2xl font-bold neon-text mb-6">📌 Tareas Financieras</h2>
+<div class="grid md:grid-cols-2 gap-6"><!-- Task List -->
+<div>
+<div class="flex justify-between items-center mb-4">
+<h3 class="text-xl font-bold neon-text">Mis Tareas</h3>
+<button class="px-3 py-1 neon-btn rounded-md text-sm"> Nueva </button></div>
+<div class="space-y-3"><!-- Task Item 1 -->
+<div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-medium flex items-center">An&aacute;lisis de portafolio</h4>
+<p class="text-sm text-gray-400 mt-1">Revisar distribuci&oacute;n de activos y rebalancear si es necesario</p>
+</div>
+<div class="flex space-x-2">&nbsp;</div>
+</div>
+<div class="mt-3">
+<div class="flex justify-between text-xs mb-1">Progreso65%</div>
+<div class="progress-bar rounded-full">&nbsp;</div>
+</div>
+</div>
+<!-- Task Item 2 -->
+<div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-medium flex items-center">Declaraci&oacute;n mensual</h4>
+<p class="text-sm text-gray-400 mt-1">Preparar documentos para declaraci&oacute;n fiscal del mes</p>
+</div>
+<div class="flex space-x-2">&nbsp;</div>
+</div>
+<div class="mt-3">
+<div class="flex justify-between text-xs mb-1">Progreso30%</div>
+<div class="progress-bar rounded-full">&nbsp;</div>
+</div>
+</div>
+<!-- Task Item 3 -->
+<div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-medium flex items-center">Investigaci&oacute;n de mercado</h4>
+<p class="text-sm text-gray-400 mt-1">Analizar nuevas oportunidades en fondos indexados</p>
+</div>
+<div class="flex space-x-2">&nbsp;</div>
+</div>
+<div class="mt-3">
+<div class="flex justify-between text-xs mb-1">Progreso15%</div>
+<div class="progress-bar rounded-full">&nbsp;</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Task Detail -->
+<div>
+<div class="neon-border p-6 rounded-lg h-full">
+<h3 class="text-xl font-bold neon-text mb-4">📋 Detalle de Tarea</h3>
+<div class="mb-6">
+<div class="flip-card w-full h-48 mb-4">
+<div class="flip-card-inner w-full h-full">
+<div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center"><img class="w-full h-full object-cover rounded-lg" src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=80" alt="Financial Analysis" /></div>
+<div class="flip-card-back">
+<h4 class="font-bold neon-text mb-2">An&aacute;lisis de Portafolio</h4>
+<p class="text-sm">Haz clic para ver la imagen</p>
+</div>
+</div>
+</div>
+<h4 class="font-bold mb-2">Instrucciones:</h4>
+<ol class="list-decimal pl-5 space-y-2 text-sm">
+<li>Revisar la distribuci&oacute;n actual de activos en tu portafolio</li>
+<li>Comparar con tu estrategia de inversi&oacute;n original</li>
+<li>Identificar desviaciones significativas</li>
+<li>Calcular montos necesarios para rebalanceo</li>
+<li>Documentar decisiones y justificaciones</li>
+</ol>
+</div>
+<div class="bg-gray-800 rounded-lg p-4">
+<h4 class="font-bold neon-text mb-2">📅 Pr&oacute;ximos pasos</h4>
+<ul class="space-y-2 text-sm">
+<li class="flex items-start">Recopilar estados de cuenta actuales (65%)</li>
+<li class="flex items-start">Analizar rendimiento por activo</li>
+<li class="flex items-start">Preparar recomendaciones de ajuste</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Slides Tab -->
+<div id="slides" class="tab-pane hidden">
+<h2 class="text-2xl font-bold neon-text mb-6">📊 Diapositivas Educativas</h2>
+<!-- Slides Navigation -->
+<div class="flex justify-center space-x-4 mb-6"><button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="1">1</button> <button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="2">2</button> <button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="3">3</button></div>
+<!-- Slides Content -->
+<div class="relative"><!-- Slide 1 -->
+<div id="slide-1" class="slide active">
+<div class="flex flex-col items-center">
+<div class="flip-card w-full h-64 mb-6">
+<div class="flip-card-inner w-full h-full">
+<div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center"><img class="w-full h-full object-cover rounded-lg" src="https://images.unsplash.com/photo-1535320903710-d993d3d77d29?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=80" alt="Compound Interest" /></div>
+<div class="flip-card-back">
+<h3 class="font-bold neon-text mb-2">Inter&eacute;s Compuesto</h3>
+<p class="text-sm">"El inter&eacute;s compuesto es la octava maravilla del mundo. Quien lo entiende, lo gana; quien no, lo paga." - Albert Einstein</p>
+</div>
+</div>
+</div>
+<div class="neon-border p-6 rounded-lg w-full">
+<h3 class="text-xl font-bold neon-text mb-4">💸 El Poder del Inter&eacute;s Compuesto</h3>
+<p class="mb-4">El inter&eacute;s compuesto es el concepto de que el inter&eacute;s ganado sobre una inversi&oacute;n se reinvierte para generar m&aacute;s inter&eacute;s, creando un efecto de crecimiento exponencial con el tiempo.</p>
+<div class="bg-gray-800 rounded-lg p-4">
+<h4 class="font-bold neon-text mb-2">F&oacute;rmula del Inter&eacute;s Compuesto</h4>
+<p class="font-mono text-green-400">A = P &times; (1 + r/n)<sup>nt</sup></p>
+<p class="text-xs mt-2">Donde:<br /> A = Valor futuro<br /> P = Principal inicial<br /> r = Tasa de inter&eacute;s anual<br /> n = N&uacute;mero de veces que se capitaliza por a&ntilde;o<br /> t = Tiempo en a&ntilde;os</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 2 -->
+<div id="slide-2" class="slide">
+<div class="flex flex-col items-center">
+<div class="flip-card w-full h-64 mb-6">
+<div class="flip-card-inner w-full h-full">
+<div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center"><img class="w-full h-full object-cover rounded-lg" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=80" alt="Diversification" /></div>
+<div class="flip-card-back">
+<h3 class="font-bold neon-text mb-2">Diversificaci&oacute;n</h3>
+<p class="text-sm">"No pongas todos tus huevos en una sola canasta" - Proverbio popular</p>
+</div>
+</div>
+</div>
+<div class="neon-border p-6 rounded-lg w-full">
+<h3 class="text-xl font-bold neon-text mb-4">🧺 La Importancia de la Diversificaci&oacute;n</h3>
+<p class="mb-4">La diversificaci&oacute;n es una estrategia de gesti&oacute;n de riesgo que mezcla una amplia variedad de inversiones dentro de un portafolio. El objetivo es maximizar el retorno invirtiendo en diferentes &aacute;reas que reaccionar&iacute;an de manera distinta a un mismo evento.</p>
+<div class="bg-gray-800 rounded-lg p-4">
+<h4 class="font-bold neon-text mb-2">Beneficios Clave</h4>
+<ul class="list-disc pl-5 space-y-1">
+<li>Reduce el riesgo no sistem&aacute;tico</li>
+<li>Suaviza la volatilidad del portafolio</li>
+<li>Proporciona exposici&oacute;n a m&uacute;ltiples oportunidades</li>
+<li>Protege contra la mala performance de un solo activo</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Slide 3 -->
+<div id="slide-3" class="slide">
+<div class="flex flex-col items-center">
+<div class="flip-card w-full h-64 mb-6">
+<div class="flip-card-inner w-full h-full">
+<div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center"><img class="w-full h-full object-cover rounded-lg" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&amp;auto=format&amp;fit=crop&amp;w=500&amp;q=80" alt="Risk vs Reward" /></div>
+<div class="flip-card-back">
+<h3 class="font-bold neon-text mb-2">Riesgo vs. Retorno</h3>
+<p class="text-sm">"El mayor riesgo es no tomar ning&uacute;n riesgo" - Mark Zuckerberg</p>
+</div>
+</div>
+</div>
+<div class="neon-border p-6 rounded-lg w-full">
+<h3 class="text-xl font-bold neon-text mb-4">⚖️ El Balance entre Riesgo y Retorno</h3>
+<p class="mb-4">En finanzas, existe una relaci&oacute;n fundamental entre riesgo y retorno potencial: a mayor riesgo asumido, mayor el retorno potencial esperado. Entender esta relaci&oacute;n es clave para construir un portafolio que se alinee con tus objetivos y tolerancia al riesgo.</p>
+<div class="bg-gray-800 rounded-lg p-4">
+<h4 class="font-bold neon-text mb-2">Tipos de Riesgo</h4>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<h5 class="font-medium text-green-400">Riesgo de Mercado</h5>
+<p class="text-xs">P&eacute;rdidas por movimientos del mercado</p>
+</div>
+<div>
+<h5 class="font-medium text-green-400">Riesgo de Cr&eacute;dito</h5>
+<p class="text-xs">El emisor no cumple con pagos</p>
+</div>
+<div>
+<h5 class="font-medium text-green-400">Riesgo de Liquidez</h5>
+<p class="text-xs">Dificultad para vender el activo</p>
+</div>
+<div>
+<h5 class="font-medium text-green-400">Riesgo de Inflaci&oacute;n</h5>
+<p class="text-xs">P&eacute;rdida de poder adquisitivo</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer --><footer class="mt-12 text-center text-gray-500 text-sm">
+<p>&copy; 2023 FinanzasDigital | Matrix Neon Edition</p>
+<p class="mt-2">Conectando el mundo financiero con tecnolog&iacute;a futurista</p>
+<div class="flex justify-center space-x-4 mt-4">&nbsp;</div>
+</footer></div>
