@@ -1,778 +1,809 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finanzas Digital | Matrix Neon</title>
+    <title>Stock Analytics Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap');
-        
-        :root {
-            --neon-green: #00ff41;
-            --matrix-dark: #003b00;
-            --matrix-light: #008f11;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
         }
-        
-        body {
-            font-family: 'Roboto Mono', monospace;
-            background-color: #0a0a0a;
-            color: #e0e0e0;
-            overflow-x: hidden;
-        }
-        
-        .neon-text {
-            text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green);
-            color: var(--neon-green);
-        }
-        
-        .matrix-bg {
-            background-color: rgba(0, 15, 0, 0.7);
-            border: 1px solid var(--matrix-light);
-        }
-        
-        .tab-active {
-            border-bottom: 2px solid var(--neon-green);
-            color: var(--neon-green);
-        }
-        
-        .neon-border {
-            border: 1px solid var(--neon-green);
-            box-shadow: 0 0 10px var(--neon-green);
-        }
-        
-        .neon-btn {
-            background: transparent;
-            color: var(--neon-green);
-            border: 1px solid var(--neon-green);
-            transition: all 0.3s;
-        }
-        
-        .neon-btn:hover {
-            background: var(--neon-green);
-            color: #000;
-            box-shadow: 0 0 10px var(--neon-green);
-        }
-        
-        .flip-card {
-            perspective: 1000px;
-            cursor: pointer;
-        }
-        
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-        
-        .flip-card.flipped .flip-card-inner {
-            transform: rotateY(180deg);
-        }
-        
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 8px;
-        }
-        
-        .flip-card-back {
-            transform: rotateY(180deg);
-            background-color: var(--matrix-dark);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .matrix-code {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.1;
-            overflow: hidden;
-        }
-        
-        .matrix-code span {
-            color: var(--neon-green);
-            position: absolute;
-            animation: fall linear infinite;
-        }
-        
-        @keyframes fall {
-            to {
-                transform: translateY(100vh);
-            }
-        }
-        
-        .task-item {
-            transition: all 0.3s;
-        }
-        
-        .task-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.3);
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: #333;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background-color: var(--neon-green);
-            transition: width 0.5s;
-        }
-        
-        .slide {
-            display: none;
-        }
-        
-        .slide.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .ticker-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body>
-    <div class="matrix-code" id="matrixCode"></div>
-    
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <header class="flex justify-between items-center mb-12">
-            <div class="flex items-center">
-                <i class="fas fa-chart-line text-3xl neon-text mr-3"></i>
-                <h1 class="text-3xl font-bold neon-text">Finanzas<span class="text-white">Digital</span></h1>
-            </div>
-            <div class="flex space-x-4">
-                <button class="px-4 py-2 neon-btn rounded-md">
-                    <i class="fas fa-user mr-2"></i>Login
-                </button>
-                <button class="px-4 py-2 neon-btn rounded-md">
-                    <i class="fas fa-cog mr-2"></i>Config
-                </button>
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Stock Analytics Dashboard</h1>
+                    <p class="text-gray-600">Compare stocks against IPC index with detailed metrics</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <i class="fas fa-chart-line mr-1"></i> Real-time
+                    </span>
+                </div>
             </div>
         </header>
-        
+
         <!-- Main Content -->
-        <main class="matrix-bg rounded-lg p-6 shadow-lg">
-            <!-- Tabs Navigation -->
-            <div class="flex border-b border-gray-700 mb-6">
-                <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="intro">
-                    <i class="fas fa-home mr-2"></i>Introducción
-                </button>
-                <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="apps">
-                    <i class="fas fa-calculator mr-2"></i>Aplicaciones
-                </button>
-                <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="tasks">
-                    <i class="fas fa-tasks mr-2"></i>Tareas
-                </button>
-                <button class="tab-btn px-4 py-2 font-medium text-white hover:text-green-400 transition" data-tab="slides">
-                    <i class="fas fa-images mr-2"></i>Diapositivas
-                </button>
-            </div>
-            
-            <!-- Tab Content -->
-            <div id="tab-content">
-                <!-- Introduction Tab -->
-                <div id="intro" class="tab-pane active">
-                    <h2 class="text-2xl font-bold neon-text mb-4">📊 Introducción al Mundo Financiero</h2>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <p class="mb-4">Bienvenido a <span class="neon-text">FinanzasDigital</span>, tu portal interactivo para dominar los conceptos financieros esenciales con un toque futurista 💹.</p>
-                            <p class="mb-4">Explora nuestras herramientas diseñadas para ayudarte a tomar decisiones informadas sobre inversiones, ahorro y planificación financiera 🚀.</p>
-                            <div class="neon-border p-4 rounded-lg mb-4">
-                                <h3 class="font-bold text-lg neon-text mb-2">💡 Conceptos Clave</h3>
-                                <ul class="list-disc pl-5 space-y-2">
-                                    <li>Interés compuesto: El poder del tiempo en tus inversiones</li>
-                                    <li>Diversificación: No pongas todos tus huevos en una canasta</li>
-                                    <li>Inflación: El enemigo silencioso de tus ahorros</li>
-                                    <li>Riesgo vs. Retorno: El equilibrio fundamental</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="neon-border p-6 rounded-lg text-center">
-                                <i class="fas fa-coins text-5xl neon-text mb-4"></i>
-                                <p class="mb-4">"El dinero no es la meta, es la herramienta para alcanzar tus sueños"</p>
-                                <div class="animate-pulse">
-                                    <span class="text-xs neon-text">Sistema financiero activado</span>
-                                    <div class="flex justify-center mt-2">
-                                        <div class="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                                        <div class="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-md p-6 h-fit sticky top-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Stock Selection</h2>
                 
-                <!-- Applications Tab -->
-                <div id="apps" class="tab-pane hidden">
-                    <h2 class="text-2xl font-bold neon-text mb-6">🧮 Aplicaciones Financieras</h2>
-                    
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <!-- Cetes Simulator -->
-                        <div class="neon-border p-6 rounded-lg">
-                            <h3 class="text-xl font-bold neon-text mb-4">📈 Simulador de CETES</h3>
-                            
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block mb-1">Monto a invertir ($)</label>
-                                    <input type="number" id="investment" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" value="10000">
-                                </div>
-                                
-                                <div>
-                                    <label class="block mb-1">Plazo (días)</label>
-                                    <select id="term" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500">
-                                        <option value="28">28 días</option>
-                                        <option value="91" selected>91 días</option>
-                                        <option value="182">182 días</option>
-                                        <option value="364">364 días</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block mb-1">Tasa de interés anual (%)</label>
-                                    <input type="number" id="rate" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" value="11.0" step="0.1">
-                                </div>
-                                
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="earlySale" class="mr-2">
-                                    <label for="earlySale">Simular venta anticipada</label>
-                                </div>
-                                
-                                <div id="earlySaleContainer" class="hidden">
-                                    <label class="block mb-1">Días antes del vencimiento</label>
-                                    <input type="number" id="earlyDays" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-green-500" value="7" min="1">
-                                </div>
-                                
-                                <button id="calculateBtn" class="w-full py-2 neon-btn rounded-md font-medium">
-                                    <i class="fas fa-calculator mr-2"></i>Calcular
-                                </button>
-                            </div>
-                            
-                            <div id="results" class="mt-6 hidden">
-                                <h4 class="font-bold neon-text mb-2">📊 Resultados</h4>
-                                <div class="bg-gray-800 rounded p-4">
-                                    <div class="flex justify-between mb-2">
-                                        <span>Interés ganado:</span>
-                                        <span id="interest" class="font-bold neon-text">$0.00</span>
-                                    </div>
-                                    <div class="flex justify-between mb-2">
-                                        <span>Monto final:</span>
-                                        <span id="finalAmount" class="font-bold neon-text">$0.00</span>
-                                    </div>
-                                    <div class="flex justify-between mb-2" id="earlySaleResult">
-                                        <span>Monto con venta anticipada:</span>
-                                        <span id="earlyAmount" class="font-bold neon-text">$0.00</span>
-                                    </div>
-                                    <div class="flex justify-between" id="penaltyResult">
-                                        <span>Penalización:</span>
-                                        <span id="penalty" class="font-bold text-red-400">$0.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Financial Tools -->
-                        <div>
-                            <div class="neon-border p-6 rounded-lg mb-6">
-                                <h3 class="text-xl font-bold neon-text mb-4">⚡ Herramientas Rápidas</h3>
-                                
-                                <div class="space-y-4">
-                                    <div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-percentage text-green-500 mr-3 text-xl"></i>
-                                            <div>
-                                                <h4 class="font-medium">Calculadora de interés compuesto</h4>
-                                                <p class="text-sm text-gray-400">Proyecta el crecimiento de tus inversiones</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-chart-pie text-green-500 mr-3 text-xl"></i>
-                                            <div>
-                                                <h4 class="font-medium">Simulador de portafolios</h4>
-                                                <p class="text-sm text-gray-400">Analiza diferentes estrategias de inversión</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-balance-scale text-green-500 mr-3 text-xl"></i>
-                                            <div>
-                                                <h4 class="font-medium">Comparador de instrumentos</h4>
-                                                <p class="text-sm text-gray-400">Encuentra la mejor opción para tus necesidades</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="p-3 bg-gray-800 rounded hover:bg-gray-700 transition cursor-pointer">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-shield-alt text-green-500 mr-3 text-xl"></i>
-                                            <div>
-                                                <h4 class="font-medium">Evaluador de riesgo</h4>
-                                                <p class="text-sm text-gray-400">Determina tu perfil de inversionista</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="neon-border p-4 rounded-lg text-center">
-                                <i class="fas fa-lightbulb text-3xl neon-text mb-2"></i>
-                                <p class="text-sm">"El conocimiento financiero es la mejor inversión que puedes hacer"</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Tasks Tab -->
-                <div id="tasks" class="tab-pane hidden">
-                    <h2 class="text-2xl font-bold neon-text mb-6">📌 Tareas Financieras</h2>
-                    
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Task List -->
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl font-bold neon-text">Mis Tareas</h3>
-                                <button class="px-3 py-1 neon-btn rounded-md text-sm">
-                                    <i class="fas fa-plus mr-1"></i>Nueva
-                                </button>
-                            </div>
-                            
-                            <div class="space-y-3">
-                                <!-- Task Item 1 -->
-                                <div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h4 class="font-medium flex items-center">
-                                                <i class="fas fa-chart-line text-green-500 mr-2"></i>
-                                                Análisis de portafolio
-                                            </h4>
-                                            <p class="text-sm text-gray-400 mt-1">Revisar distribución de activos y rebalancear si es necesario</p>
-                                        </div>
-                                        <div class="flex space-x-2">
-                                            <button class="text-gray-400 hover:text-green-500">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-gray-400 hover:text-red-500">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="flex justify-between text-xs mb-1">
-                                            <span>Progreso</span>
-                                            <span>65%</span>
-                                        </div>
-                                        <div class="progress-bar rounded-full">
-                                            <div class="progress-fill rounded-full" style="width: 65%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Task Item 2 -->
-                                <div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h4 class="font-medium flex items-center">
-                                                <i class="fas fa-file-invoice-dollar text-green-500 mr-2"></i>
-                                                Declaración mensual
-                                            </h4>
-                                            <p class="text-sm text-gray-400 mt-1">Preparar documentos para declaración fiscal del mes</p>
-                                        </div>
-                                        <div class="flex space-x-2">
-                                            <button class="text-gray-400 hover:text-green-500">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-gray-400 hover:text-red-500">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="flex justify-between text-xs mb-1">
-                                            <span>Progreso</span>
-                                            <span>30%</span>
-                                        </div>
-                                        <div class="progress-bar rounded-full">
-                                            <div class="progress-fill rounded-full" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Task Item 3 -->
-                                <div class="task-item bg-gray-800 p-4 rounded-lg neon-border">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h4 class="font-medium flex items-center">
-                                                <i class="fas fa-book text-green-500 mr-2"></i>
-                                                Investigación de mercado
-                                            </h4>
-                                            <p class="text-sm text-gray-400 mt-1">Analizar nuevas oportunidades en fondos indexados</p>
-                                        </div>
-                                        <div class="flex space-x-2">
-                                            <button class="text-gray-400 hover:text-green-500">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="text-gray-400 hover:text-red-500">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="flex justify-between text-xs mb-1">
-                                            <span>Progreso</span>
-                                            <span>15%</span>
-                                        </div>
-                                        <div class="progress-bar rounded-full">
-                                            <div class="progress-fill rounded-full" style="width: 15%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Task Detail -->
-                        <div>
-                            <div class="neon-border p-6 rounded-lg h-full">
-                                <h3 class="text-xl font-bold neon-text mb-4">📋 Detalle de Tarea</h3>
-                                
-                                <div class="mb-6">
-                                    <div class="flip-card w-full h-48 mb-4" onclick="this.classList.toggle('flipped')">
-                                        <div class="flip-card-inner w-full h-full">
-                                            <div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center">
-                                                <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="Financial Analysis" class="w-full h-full object-cover rounded-lg">
-                                            </div>
-                                            <div class="flip-card-back">
-                                                <h4 class="font-bold neon-text mb-2">Análisis de Portafolio</h4>
-                                                <p class="text-sm">Haz clic para ver la imagen</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <h4 class="font-bold mb-2">Instrucciones:</h4>
-                                    <ol class="list-decimal pl-5 space-y-2 text-sm">
-                                        <li>Revisar la distribución actual de activos en tu portafolio</li>
-                                        <li>Comparar con tu estrategia de inversión original</li>
-                                        <li>Identificar desviaciones significativas</li>
-                                        <li>Calcular montos necesarios para rebalanceo</li>
-                                        <li>Documentar decisiones y justificaciones</li>
-                                    </ol>
-                                </div>
-                                
-                                <div class="bg-gray-800 rounded-lg p-4">
-                                    <h4 class="font-bold neon-text mb-2">📅 Próximos pasos</h4>
-                                    <ul class="space-y-2 text-sm">
-                                        <li class="flex items-start">
-                                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
-                                            <span>Recopilar estados de cuenta actuales (65%)</span>
-                                        </li>
-                                        <li class="flex items-start">
-                                            <i class="far fa-circle text-gray-500 mr-2 mt-1"></i>
-                                            <span>Analizar rendimiento por activo</span>
-                                        </li>
-                                        <li class="flex items-start">
-                                            <i class="far fa-circle text-gray-500 mr-2 mt-1"></i>
-                                            <span>Preparar recomendaciones de ajuste</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Slides Tab -->
-                <div id="slides" class="tab-pane hidden">
-                    <h2 class="text-2xl font-bold neon-text mb-6">📊 Diapositivas Educativas</h2>
-                    
-                    <!-- Slides Navigation -->
-                    <div class="flex justify-center space-x-4 mb-6">
-                        <button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="1">1</button>
-                        <button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="2">2</button>
-                        <button class="slide-nav px-4 py-2 neon-btn rounded-md" data-slide="3">3</button>
-                    </div>
-                    
-                    <!-- Slides Content -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Stock</label>
                     <div class="relative">
-                        <!-- Slide 1 -->
-                        <div class="slide active" id="slide-1">
-                            <div class="flex flex-col items-center">
-                                <div class="flip-card w-full h-64 mb-6" onclick="this.classList.toggle('flipped')">
-                                    <div class="flip-card-inner w-full h-full">
-                                        <div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center">
-                                            <img src="https://images.unsplash.com/photo-1535320903710-d993d3d77d29?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="Compound Interest" class="w-full h-full object-cover rounded-lg">
-                                        </div>
-                                        <div class="flip-card-back">
-                                            <h3 class="font-bold neon-text mb-2">Interés Compuesto</h3>
-                                            <p class="text-sm">"El interés compuesto es la octava maravilla del mundo. Quien lo entiende, lo gana; quien no, lo paga." - Albert Einstein</p>
-                                        </div>
-                                    </div>
+                        <select id="tickerSelect" class="ticker-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="" disabled selected>Choose a stock</option>
+                            <option value="AMXL.MX">America Movil (AMXL.MX)</option>
+                            <option value="WALMEX.MX">Walmart Mexico (WALMEX.MX)</option>
+                            <option value="GFNORTEO.MX">Grupo Financiero Banorte (GFNORTEO.MX)</option>
+                            <option value="FEMSAUBD.MX">Femsa (FEMSAUBD.MX)</option>
+                            <option value="TLEVISACPO.MX">Televisa (TLEVISACPO.MX)</option>
+                            <option value="ASURB.MX">Grupo Aeroportuario del Sureste (ASURB.MX)</option>
+                            <option value="GMEXICOB.MX">Grupo Mexico (GMEXICOB.MX)</option>
+                            <option value="BIMBOA.MX">Grupo Bimbo (BIMBOA.MX)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="timeRange" class="ticker-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="1mo">1 Month</option>
+                            <option value="3mo" selected>3 Months</option>
+                            <option value="6mo">6 Months</option>
+                            <option value="1y">1 Year</option>
+                            <option value="2y">2 Years</option>
+                            <option value="5y">5 Years</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="fetchDataBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-download mr-2"></i> Fetch Data
+                </button>
+
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500 mb-3">Recently Viewed</h3>
+                    <div id="recentTickers" class="space-y-2">
+                        <!-- Recent tickers will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden bg-white rounded-xl shadow-md p-8 text-center">
+                    <div class="flex flex-col items-center justify-center py-12">
+                        <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full spinner mb-4"></div>
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">Fetching Stock Data</h3>
+                        <p class="text-gray-600">Please wait while we retrieve the latest market information...</p>
+                    </div>
+                </div>
+
+                <!-- Stock Overview -->
+                <div id="stockOverview" class="hidden bg-white rounded-xl shadow-md p-6 fade-in">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 id="stockName" class="text-2xl font-bold text-gray-800">-</h2>
+                            <div class="flex items-center mt-1">
+                                <span id="stockTicker" class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm font-medium mr-2">-</span>
+                                <span id="stockExchange" class="text-gray-600 text-sm">-</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div id="currentPrice" class="text-3xl font-bold text-gray-800">-</div>
+                            <div id="priceChange" class="flex items-center justify-end mt-1">
+                                <span class="text-sm font-medium">-</span>
+                                <span class="ml-1 text-sm">(-%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-gray-500 text-sm font-medium mb-1">Market Cap</div>
+                            <div id="marketCap" class="text-lg font-semibold text-gray-800">-</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-gray-500 text-sm font-medium mb-1">Volume</div>
+                            <div id="volume" class="text-lg font-semibold text-gray-800">-</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="text-gray-500 text-sm font-medium mb-1">P/E Ratio</div>
+                            <div id="peRatio" class="text-lg font-semibold text-gray-800">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div id="chartSection" class="hidden bg-white rounded-xl shadow-md p-6 fade-in">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800">Performance vs IPC</h2>
+                        <div class="flex space-x-2">
+                            <button class="chart-period-btn px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-lg" data-period="1w">1W</button>
+                            <button class="chart-period-btn px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-lg" data-period="1m">1M</button>
+                            <button class="chart-period-btn px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-lg" data-period="3m">3M</button>
+                            <button class="chart-period-btn px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-lg" data-period="1y">1Y</button>
+                            <button class="chart-period-btn px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-lg" data-period="max">MAX</button>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Metrics Section -->
+                <div id="metricsSection" class="hidden bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Performance Metrics</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Returns -->
+                        <div class="bg-gray-50 rounded-lg p-5 card-hover transition duration-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-arrow-trend-up text-blue-600"></i>
                                 </div>
-                                
-                                <div class="neon-border p-6 rounded-lg w-full">
-                                    <h3 class="text-xl font-bold neon-text mb-4">💸 El Poder del Interés Compuesto</h3>
-                                    <p class="mb-4">El interés compuesto es el concepto de que el interés ganado sobre una inversión se reinvierte para generar más interés, creando un efecto de crecimiento exponencial con el tiempo.</p>
-                                    <div class="bg-gray-800 rounded-lg p-4">
-                                        <h4 class="font-bold neon-text mb-2">Fórmula del Interés Compuesto</h4>
-                                        <p class="font-mono text-green-400">A = P × (1 + r/n)<sup>nt</sup></p>
-                                        <p class="text-xs mt-2">Donde:<br>
-                                        A = Valor futuro<br>
-                                        P = Principal inicial<br>
-                                        r = Tasa de interés anual<br>
-                                        n = Número de veces que se capitaliza por año<br>
-                                        t = Tiempo en años</p>
-                                    </div>
+                                <h3 class="text-lg font-medium text-gray-800">Returns</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">1 Month</span>
+                                    <span id="return1m" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">3 Months</span>
+                                    <span id="return3m" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">6 Months</span>
+                                    <span id="return6m" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">1 Year</span>
+                                    <span id="return1y" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">YTD</span>
+                                    <span id="returnYtd" class="font-medium">-</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Slide 2 -->
-                        <div class="slide" id="slide-2">
-                            <div class="flex flex-col items-center">
-                                <div class="flip-card w-full h-64 mb-6" onclick="this.classList.toggle('flipped')">
-                                    <div class="flip-card-inner w-full h-full">
-                                        <div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center">
-                                            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="Diversification" class="w-full h-full object-cover rounded-lg">
-                                        </div>
-                                        <div class="flip-card-back">
-                                            <h3 class="font-bold neon-text mb-2">Diversificación</h3>
-                                            <p class="text-sm">"No pongas todos tus huevos en una sola canasta" - Proverbio popular</p>
-                                        </div>
-                                    </div>
+
+                        <!-- Volatility -->
+                        <div class="bg-gray-50 rounded-lg p-5 card-hover transition duration-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-bolt text-purple-600"></i>
                                 </div>
-                                
-                                <div class="neon-border p-6 rounded-lg w-full">
-                                    <h3 class="text-xl font-bold neon-text mb-4">🧺 La Importancia de la Diversificación</h3>
-                                    <p class="mb-4">La diversificación es una estrategia de gestión de riesgo que mezcla una amplia variedad de inversiones dentro de un portafolio. El objetivo es maximizar el retorno invirtiendo en diferentes áreas que reaccionarían de manera distinta a un mismo evento.</p>
-                                    <div class="bg-gray-800 rounded-lg p-4">
-                                        <h4 class="font-bold neon-text mb-2">Beneficios Clave</h4>
-                                        <ul class="list-disc pl-5 space-y-1">
-                                            <li>Reduce el riesgo no sistemático</li>
-                                            <li>Suaviza la volatilidad del portafolio</li>
-                                            <li>Proporciona exposición a múltiples oportunidades</li>
-                                            <li>Protege contra la mala performance de un solo activo</li>
-                                        </ul>
-                                    </div>
+                                <h3 class="text-lg font-medium text-gray-800">Volatility</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Daily Volatility</span>
+                                    <span id="dailyVolatility" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Annual Volatility</span>
+                                    <span id="annualVolatility" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Beta (vs IPC)</span>
+                                    <span id="beta" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Sharpe Ratio</span>
+                                    <span id="sharpeRatio" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Max Drawdown</span>
+                                    <span id="maxDrawdown" class="font-medium">-</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Slide 3 -->
-                        <div class="slide" id="slide-3">
-                            <div class="flex flex-col items-center">
-                                <div class="flip-card w-full h-64 mb-6" onclick="this.classList.toggle('flipped')">
-                                    <div class="flip-card-inner w-full h-full">
-                                        <div class="flip-card-front bg-gray-800 rounded-lg flex items-center justify-center">
-                                            <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80" alt="Risk vs Reward" class="w-full h-full object-cover rounded-lg">
-                                        </div>
-                                        <div class="flip-card-back">
-                                            <h3 class="font-bold neon-text mb-2">Riesgo vs. Retorno</h3>
-                                            <p class="text-sm">"El mayor riesgo es no tomar ningún riesgo" - Mark Zuckerberg</p>
-                                        </div>
-                                    </div>
+
+                        <!-- Valuation -->
+                        <div class="bg-gray-50 rounded-lg p-5 card-hover transition duration-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-coins text-green-600"></i>
                                 </div>
-                                
-                                <div class="neon-border p-6 rounded-lg w-full">
-                                    <h3 class="text-xl font-bold neon-text mb-4">⚖️ El Balance entre Riesgo y Retorno</h3>
-                                    <p class="mb-4">En finanzas, existe una relación fundamental entre riesgo y retorno potencial: a mayor riesgo asumido, mayor el retorno potencial esperado. Entender esta relación es clave para construir un portafolio que se alinee con tus objetivos y tolerancia al riesgo.</p>
-                                    <div class="bg-gray-800 rounded-lg p-4">
-                                        <h4 class="font-bold neon-text mb-2">Tipos de Riesgo</h4>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <h5 class="font-medium text-green-400">Riesgo de Mercado</h5>
-                                                <p class="text-xs">Pérdidas por movimientos del mercado</p>
-                                            </div>
-                                            <div>
-                                                <h5 class="font-medium text-green-400">Riesgo de Crédito</h5>
-                                                <p class="text-xs">El emisor no cumple con pagos</p>
-                                            </div>
-                                            <div>
-                                                <h5 class="font-medium text-green-400">Riesgo de Liquidez</h5>
-                                                <p class="text-xs">Dificultad para vender el activo</p>
-                                            </div>
-                                            <div>
-                                                <h5 class="font-medium text-green-400">Riesgo de Inflación</h5>
-                                                <p class="text-xs">Pérdida de poder adquisitivo</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <h3 class="text-lg font-medium text-gray-800">Valuation</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">P/E Ratio</span>
+                                    <span id="peRatioMetric" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">P/B Ratio</span>
+                                    <span id="pbRatio" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Dividend Yield</span>
+                                    <span id="dividendYield" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">EPS</span>
+                                    <span id="eps" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">ROE</span>
+                                    <span id="roe" class="font-medium">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technicals -->
+                        <div class="bg-gray-50 rounded-lg p-5 card-hover transition duration-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-yellow-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-chart-simple text-yellow-600"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-800">Technical Indicators</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">50-Day MA</span>
+                                    <span id="ma50" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">200-Day MA</span>
+                                    <span id="ma200" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">RSI (14-day)</span>
+                                    <span id="rsi" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">52-Week High</span>
+                                    <span id="week52High" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">52-Week Low</span>
+                                    <span id="week52Low" class="font-medium">-</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- News Section -->
+                <div id="newsSection" class="hidden bg-white rounded-xl shadow-md p-6 fade-in">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Latest News</h2>
+                    <div id="newsContainer" class="space-y-4">
+                        <!-- News items will be added here -->
+                    </div>
+                </div>
             </div>
-        </main>
-        
-        <!-- Footer -->
-        <footer class="mt-12 text-center text-gray-500 text-sm">
-            <p>© 2023 FinanzasDigital | Matrix Neon Edition</p>
-            <p class="mt-2">Conectando el mundo financiero con tecnología futurista</p>
-            <div class="flex justify-center space-x-4 mt-4">
-                <a href="#" class="hover:text-green-500"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="hover:text-green-500"><i class="fab fa-linkedin"></i></a>
-                <a href="#" class="hover:text-green-500"><i class="fab fa-github"></i></a>
-            </div>
-        </footer>
+        </div>
     </div>
 
     <script>
-        // Matrix background effect
-        function createMatrixEffect() {
-            const container = document.getElementById('matrixCode');
-            const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+        // Global variables
+        let performanceChart;
+        let stockData = {};
+        let ipcData = {};
+        let currentTicker = '';
+        
+        // DOM elements
+        const fetchDataBtn = document.getElementById('fetchDataBtn');
+        const tickerSelect = document.getElementById('tickerSelect');
+        const timeRange = document.getElementById('timeRange');
+        const loadingState = document.getElementById('loadingState');
+        const stockOverview = document.getElementById('stockOverview');
+        const chartSection = document.getElementById('chartSection');
+        const metricsSection = document.getElementById('metricsSection');
+        const newsSection = document.getElementById('newsSection');
+        const recentTickers = document.getElementById('recentTickers');
+        
+        // Event listeners
+        fetchDataBtn.addEventListener('click', fetchStockData);
+        document.querySelectorAll('.chart-period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Update active button
+                document.querySelectorAll('.chart-period-btn').forEach(b => {
+                    b.classList.remove('bg-blue-100', 'text-blue-800');
+                    b.classList.add('bg-gray-100', 'text-gray-800');
+                });
+                this.classList.remove('bg-gray-100', 'text-gray-800');
+                this.classList.add('bg-blue-100', 'text-blue-800');
+                
+                // Update chart with selected period
+                updateChart(this.dataset.period);
+            });
+        });
+        
+        // Initialize with some recent tickers
+        updateRecentTickers(['AMXL.MX', 'WALMEX.MX', 'GFNORTEO.MX']);
+        
+        // Fetch stock data from Yahoo Finance
+        async function fetchStockData() {
+            const ticker = tickerSelect.value;
+            const range = timeRange.value;
             
-            for (let i = 0; i < 50; i++) {
-                const span = document.createElement('span');
-                span.textContent = chars.charAt(Math.floor(Math.random() * chars.length));
-                span.style.left = Math.random() * 100 + 'vw';
-                span.style.animationDuration = (Math.random() * 5 + 3) + 's';
-                span.style.animationDelay = Math.random() * 5 + 's';
-                span.style.fontSize = (Math.random() * 10 + 10) + 'px';
-                container.appendChild(span);
+            if (!ticker) {
+                alert('Please select a stock ticker');
+                return;
+            }
+            
+            currentTicker = ticker;
+            addToRecentTickers(ticker);
+            
+            // Show loading state
+            loadingState.classList.remove('hidden');
+            stockOverview.classList.add('hidden');
+            chartSection.classList.add('hidden');
+            metricsSection.classList.add('hidden');
+            newsSection.classList.add('hidden');
+            
+            try {
+                // Fetch stock data and IPC data in parallel
+                const [stockRes, ipcRes] = await Promise.all([
+                    fetchYahooFinanceData(ticker, range),
+                    fetchYahooFinanceData('^MXX', range) // IPC index
+                ]);
+                
+                stockData = processData(stockRes);
+                ipcData = processData(ipcRes);
+                
+                // Update UI
+                updateStockOverview(ticker);
+                updateChart(range);
+                updateMetrics();
+                updateNews(ticker);
+                
+                // Hide loading and show content
+                loadingState.classList.add('hidden');
+                stockOverview.classList.remove('hidden');
+                chartSection.classList.remove('hidden');
+                metricsSection.classList.remove('hidden');
+                newsSection.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                loadingState.classList.add('hidden');
+                alert('Error fetching data. Please try again later.');
             }
         }
         
-        // Tab functionality
-        function setupTabs() {
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabPanes = document.querySelectorAll('.tab-pane');
+        // Fetch data from Yahoo Finance API (using a proxy)
+        async function fetchYahooFinanceData(ticker, range) {
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}`;
             
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const tabId = button.getAttribute('data-tab');
+            try {
+                // In a real app, you would use a proper backend proxy to avoid CORS issues
+                // This is a simplified version for demonstration
+                const response = await axios.get(url);
+                return response.data;
+            } catch (error) {
+                console.error('Error fetching from Yahoo Finance:', error);
+                throw error;
+            }
+        }
+        
+        // Process raw Yahoo Finance data
+        function processData(data) {
+            const result = {};
+            const chart = data.chart.result[0];
+            
+            result.timestamp = chart.timestamp;
+            result.indicators = chart.indicators;
+            result.meta = chart.meta;
+            
+            // Get closing prices
+            result.closes = chart.indicators.quote[0].close;
+            
+            // Calculate returns
+            result.returns = calculateReturns(result.closes);
+            
+            return result;
+        }
+        
+        // Calculate returns from price data
+        function calculateReturns(prices) {
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+            }
+            return returns;
+        }
+        
+        // Update stock overview section
+        function updateStockOverview(ticker) {
+            const meta = stockData.meta;
+            
+            document.getElementById('stockName').textContent = meta.symbol;
+            document.getElementById('stockTicker').textContent = ticker;
+            document.getElementById('stockExchange').textContent = 'BMV';
+            
+            const currentPrice = meta.regularMarketPrice;
+            const previousClose = meta.chartPreviousClose;
+            const change = currentPrice - previousClose;
+            const changePercent = (change / previousClose) * 100;
+            
+            document.getElementById('currentPrice').textContent = formatCurrency(currentPrice);
+            
+            const priceChangeElement = document.getElementById('priceChange');
+            priceChangeElement.innerHTML = '';
+            
+            const changeSpan = document.createElement('span');
+            changeSpan.className = 'text-sm font-medium';
+            changeSpan.textContent = formatCurrency(change) + ` (${changePercent.toFixed(2)}%)`;
+            
+            if (change >= 0) {
+                changeSpan.classList.add('text-green-600');
+                priceChangeElement.innerHTML = '<i class="fas fa-caret-up text-green-600 mr-1"></i>';
+            } else {
+                changeSpan.classList.add('text-red-600');
+                priceChangeElement.innerHTML = '<i class="fas fa-caret-down text-red-600 mr-1"></i>';
+            }
+            
+            priceChangeElement.appendChild(changeSpan);
+            
+            // Update other metrics
+            document.getElementById('marketCap').textContent = meta.marketCap ? formatCurrency(meta.marketCap) : 'N/A';
+            document.getElementById('volume').textContent = meta.regularMarketVolume ? formatNumber(meta.regularMarketVolume) : 'N/A';
+            document.getElementById('peRatio').textContent = meta.trailingPE ? meta.trailingPE.toFixed(2) : 'N/A';
+        }
+        
+        // Create or update the performance chart
+        function updateChart(range) {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const stockDates = stockData.timestamp.map(t => new Date(t * 1000));
+            const stockCloses = stockData.closes;
+            const ipcCloses = ipcData.closes;
+            
+            // Normalize prices to percentage change from first day
+            const normalizedStock = normalizePrices(stockCloses);
+            const normalizedIpc = normalizePrices(ipcCloses);
+            
+            // Use the shorter array length to ensure matching dates
+            const minLength = Math.min(stockDates.length, normalizedStock.length, normalizedIpc.length);
+            const displayDates = stockDates.slice(0, minLength);
+            const displayStock = normalizedStock.slice(0, minLength);
+            const displayIpc = normalizedIpc.slice(0, minLength);
+            
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+            
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayDates.map(date => formatDate(date)),
+                    datasets: [
+                        {
+                            label: currentTicker,
+                            data: displayStock,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'IPC',
+                            data: displayIpc,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: false,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Normalize prices to percentage change from first day
+        function normalizePrices(prices) {
+            if (!prices || prices.length === 0) return [];
+            
+            const firstPrice = prices[0];
+            return prices.map(price => ((price - firstPrice) / firstPrice) * 100);
+        }
+        
+        // Update performance metrics
+        function updateMetrics() {
+            // Calculate returns
+            const closes = stockData.closes;
+            const returns = stockData.returns;
+            
+            if (closes.length > 0) {
+                const lastPrice = closes[closes.length - 1];
+                
+                // 1 month return (approx 21 trading days)
+                const days1m = Math.min(21, closes.length - 1);
+                const return1m = ((lastPrice - closes[closes.length - 1 - days1m]) / closes[closes.length - 1 - days1m]) * 100;
+                document.getElementById('return1m').textContent = return1m.toFixed(2) + '%';
+                
+                // 3 months return (approx 63 trading days)
+                const days3m = Math.min(63, closes.length - 1);
+                const return3m = ((lastPrice - closes[closes.length - 1 - days3m]) / closes[closes.length - 1 - days3m]) * 100;
+                document.getElementById('return3m').textContent = return3m.toFixed(2) + '%';
+                
+                // 6 months return (approx 126 trading days)
+                const days6m = Math.min(126, closes.length - 1);
+                const return6m = ((lastPrice - closes[closes.length - 1 - days6m]) / closes[closes.length - 1 - days6m]) * 100;
+                document.getElementById('return6m').textContent = return6m.toFixed(2) + '%';
+                
+                // 1 year return (approx 252 trading days)
+                const days1y = Math.min(252, closes.length - 1);
+                const return1y = ((lastPrice - closes[closes.length - 1 - days1y]) / closes[closes.length - 1 - days1y]) * 100;
+                document.getElementById('return1y').textContent = return1y.toFixed(2) + '%';
+                
+                // YTD return (from first day of current year)
+                const firstDayOfYear = getFirstTradingDayOfYear();
+                const ytdReturn = ((lastPrice - firstDayOfYear) / firstDayOfYear) * 100;
+                document.getElementById('returnYtd').textContent = ytdReturn.toFixed(2) + '%';
+            }
+            
+            // Calculate volatility
+            if (returns.length > 0) {
+                const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+                const variance = returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / returns.length;
+                const dailyVolatility = Math.sqrt(variance);
+                const annualVolatility = dailyVolatility * Math.sqrt(252);
+                
+                document.getElementById('dailyVolatility').textContent = (dailyVolatility * 100).toFixed(2) + '%';
+                document.getElementById('annualVolatility').textContent = (annualVolatility * 100).toFixed(2) + '%';
+                
+                // Calculate Beta (simplified)
+                const stockReturns = stockData.returns;
+                const ipcReturns = ipcData.returns;
+                
+                if (stockReturns.length > 0 && ipcReturns.length > 0) {
+                    const minLength = Math.min(stockReturns.length, ipcReturns.length);
+                    const cov = covariance(stockReturns.slice(0, minLength), ipcReturns.slice(0, minLength));
+                    const varIpc = varianceOfArray(ipcReturns.slice(0, minLength));
+                    const beta = cov / varIpc;
                     
-                    // Update active tab button
-                    tabButtons.forEach(btn => btn.classList.remove('tab-active'));
-                    button.classList.add('tab-active');
-                    
-                    // Show selected tab content
-                    tabPanes.forEach(pane => {
-                        pane.classList.remove('active');
-                        pane.classList.add('hidden');
-                    });
-                    
-                    document.getElementById(tabId).classList.remove('hidden');
-                    document.getElementById(tabId).classList.add('active');
+                    document.getElementById('beta').textContent = beta.toFixed(2);
+                }
+                
+                // Sharpe ratio (simplified, assuming 0% risk-free rate)
+                const sharpeRatio = (mean / dailyVolatility) * Math.sqrt(252);
+                document.getElementById('sharpeRatio').textContent = sharpeRatio.toFixed(2);
+                
+                // Max drawdown
+                const maxDrawdown = calculateMaxDrawdown(stockData.closes);
+                document.getElementById('maxDrawdown').textContent = (maxDrawdown * 100).toFixed(2) + '%';
+            }
+            
+            // Valuation metrics (mock data for demonstration)
+            document.getElementById('peRatioMetric').textContent = stockData.meta.trailingPE ? stockData.meta.trailingPE.toFixed(2) : 'N/A';
+            document.getElementById('pbRatio').textContent = (Math.random() * 5 + 1).toFixed(2);
+            document.getElementById('dividendYield').textContent = (Math.random() * 5).toFixed(2) + '%';
+            document.getElementById('eps').textContent = formatCurrency(Math.random() * 10 + 1);
+            document.getElementById('roe').textContent = (Math.random() * 30 + 5).toFixed(2) + '%';
+            
+            // Technical indicators (mock data for demonstration)
+            const lastClose = stockData.closes[stockData.closes.length - 1];
+            document.getElementById('ma50').textContent = formatCurrency(lastClose * (0.98 + Math.random() * 0.04));
+            document.getElementById('ma200').textContent = formatCurrency(lastClose * (0.95 + Math.random() * 0.06));
+            document.getElementById('rsi').textContent = (30 + Math.random() * 40).toFixed(2);
+            document.getElementById('week52High').textContent = formatCurrency(lastClose * (1.05 + Math.random() * 0.15));
+            document.getElementById('week52Low').textContent = formatCurrency(lastClose * (0.85 - Math.random() * 0.10));
+        }
+        
+        // Update news section
+        function updateNews(ticker) {
+            const newsContainer = document.getElementById('newsContainer');
+            newsContainer.innerHTML = '';
+            
+            // Mock news data (in a real app, you would fetch from a news API)
+            const mockNews = [
+                {
+                    title: `${ticker.split('.')[0]} reports Q2 earnings above estimates`,
+                    source: 'El Financiero',
+                    date: '2 hours ago',
+                    summary: 'The company reported earnings per share of $1.25, beating analyst estimates of $1.15. Revenue came in at $5.2 billion versus the expected $5.0 billion.'
+                },
+                {
+                    title: `Analysts raise price target for ${ticker.split('.')[0]} after strong results`,
+                    source: 'Expansión',
+                    date: '5 hours ago',
+                    summary: 'Several analysts have increased their price targets following the company\'s better-than-expected quarterly results and optimistic guidance.'
+                },
+                {
+                    title: `${ticker.split('.')[0]} announces new CEO`,
+                    source: 'El Economista',
+                    date: '1 day ago',
+                    summary: 'The board of directors has appointed a new Chief Executive Officer, effective immediately. The incoming CEO has previously served as COO for the past 3 years.'
+                },
+                {
+                    title: `Sector outlook: What's next for ${ticker.split('.')[0]} and competitors`,
+                    source: 'Forbes México',
+                    date: '2 days ago',
+                    summary: 'Industry analysts weigh in on the current market conditions and how major players in the sector are positioned for the coming quarters.'
+                }
+            ];
+            
+            mockNews.forEach(newsItem => {
+                const newsElement = document.createElement('div');
+                newsElement.className = 'p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200';
+                newsElement.innerHTML = `
+                    <h3 class="font-medium text-lg text-gray-800 mb-1">${newsItem.title}</h3>
+                    <div class="flex items-center text-sm text-gray-500 mb-2">
+                        <span>${newsItem.source}</span>
+                        <span class="mx-2">•</span>
+                        <span>${newsItem.date}</span>
+                    </div>
+                    <p class="text-gray-600">${newsItem.summary}</p>
+                `;
+                newsContainer.appendChild(newsElement);
+            });
+        }
+        
+        // Update recent tickers list
+        function updateRecentTickers(tickers) {
+            recentTickers.innerHTML = '';
+            tickers.forEach(ticker => {
+                const tickerElement = document.createElement('div');
+                tickerElement.className = 'flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition duration-200';
+                tickerElement.innerHTML = `
+                    <span class="font-medium">${ticker}</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                `;
+                tickerElement.addEventListener('click', () => {
+                    tickerSelect.value = ticker;
+                    fetchStockData();
                 });
+                recentTickers.appendChild(tickerElement);
             });
         }
         
-        // Slide functionality
-        function setupSlides() {
-            const slideNavs = document.querySelectorAll('.slide-nav');
-            const slides = document.querySelectorAll('.slide');
-            
-            slideNavs.forEach(nav => {
-                nav.addEventListener('click', () => {
-                    const slideId = nav.getAttribute('data-slide');
-                    
-                    // Update active slide nav
-                    slideNavs.forEach(btn => btn.classList.remove('bg-green-500', 'text-black'));
-                    nav.classList.add('bg-green-500', 'text-black');
-                    
-                    // Show selected slide
-                    slides.forEach(slide => {
-                        slide.classList.remove('active');
-                    });
-                    
-                    document.getElementById(`slide-${slideId}`).classList.add('active');
-                });
-            });
+        // Add a ticker to recent tickers (if not already there)
+        function addToRecentTickers(ticker) {
+            const currentTickers = Array.from(recentTickers.querySelectorAll('div')).map(el => el.querySelector('span').textContent);
+            if (!currentTickers.includes(ticker)) {
+                const newTickers = [ticker, ...currentTickers].slice(0, 3);
+                updateRecentTickers(newTickers);
+            }
         }
         
-        // Cetes Simulator
-        function setupCetesSimulator() {
-            const earlySaleCheckbox = document.getElementById('earlySale');
-            const earlySaleContainer = document.getElementById('earlySaleContainer');
-            const calculateBtn = document.getElementById('calculateBtn');
-            const resultsContainer = document.getElementById('results');
+        // Helper functions
+        function formatCurrency(value) {
+            if (value === null || value === undefined) return 'N/A';
+            return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        function formatNumber(value) {
+            if (value === null || value === undefined) return 'N/A';
+            if (value >= 1000000000) {
+                return (value / 1000000000).toFixed(2) + 'B';
+            } else if (value >= 1000000) {
+                return (value / 1000000).toFixed(2) + 'M';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(2) + 'K';
+            }
+            return value.toLocaleString();
+        }
+        
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        function calculateMaxDrawdown(prices) {
+            if (!prices || prices.length === 0) return 0;
             
-            // Toggle early sale options
-            earlySaleCheckbox.addEventListener('change', () => {
-                if (earlySaleCheckbox.checked) {
-                    earlySaleContainer.classList.remove('hidden');
+            let peak = prices[0];
+            let maxDrawdown = 0;
+            
+            for (let i = 1; i < prices.length; i++) {
+                if (prices[i] > peak) {
+                    peak = prices[i];
                 } else {
-                    earlySaleContainer.classList.add('hidden');
+                    const drawdown = (peak - prices[i]) / peak;
+                    if (drawdown > maxDrawdown) {
+                        maxDrawdown = drawdown;
+                    }
                 }
-            });
+            }
             
-            // Calculate results
-            calculateBtn.addEventListener('click', () => {
-                const investment = parseFloat(document.getElementById('investment').value);
-                const term = parseInt(document.getElementById('term').value);
-                const rate = parseFloat(document.getElementById('rate').value) / 100;
-                const earlySale = earlySaleCheckbox.checked;
-                const earlyDays = earlySale ? parseInt(document.getElementById('earlyDays').value) : 0;
-                
-                // Basic calculation
-                const dailyRate = rate / 365;
-                const interest = investment * dailyRate * term;
-                const finalAmount = investment + interest;
-                
-                // Early sale calculation with penalty
-                let earlyAmount = 0;
-                let penalty = 0;
-                
-                if (earlySale && earlyDays > 0 && earlyDays < term) {
-                    const daysUsed = term - earlyDays;
-                    const interestEarned = investment * dailyRate * daysUsed;
-                    penalty = interestEarned * 0.01; // 1% penalty
-                    earlyAmount = investment + interestEarned - penalty;
-                }
-                
-                // Display results
-                document.getElementById('interest').textContent = `$${interest.toFixed(2)}`;
-                document.getElementById('finalAmount').textContent = `$${finalAmount.toFixed(2)}`;
-                
-                if (earlySale) {
-                    document.getElementById('earlyAmount').textContent = `$${earlyAmount.toFixed(2)}`;
-                    document.getElementById('penalty').textContent = `$${penalty.toFixed(2)}`;
-                    document.getElementById('earlySaleResult').classList.remove('hidden');
-                    document.getElementById('penaltyResult').classList.remove('hidden');
-                } else {
-                    document.getElementById('earlySaleResult').classList.add('hidden');
-                    document.getElementById('penaltyResult').classList.add('hidden');
-                }
-                
-                resultsContainer.classList.remove('hidden');
-            });
+            return maxDrawdown;
         }
         
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            createMatrixEffect();
-            setupTabs();
-            setupSlides();
-            setupCetesSimulator();
+        function covariance(arr1, arr2) {
+            if (arr1.length !== arr2.length || arr1.length === 0) return 0;
             
-            // Set first tab as active by default
-            document.querySelector('.tab-btn').click();
-            document.querySelector('.slide-nav').click();
-        });
+            const mean1 = arr1.reduce((a, b) => a + b, 0) / arr1.length;
+            const mean2 = arr2.reduce((a, b) => a + b, 0) / arr2.length;
+            
+            let cov = 0;
+            for (let i = 0; i < arr1.length; i++) {
+                cov += (arr1[i] - mean1) * (arr2[i] - mean2);
+            }
+            
+            return cov / arr1.length;
+        }
+        
+        function varianceOfArray(arr) {
+            if (arr.length === 0) return 0;
+            
+            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+            return arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length;
+        }
+        
+        function getFirstTradingDayOfYear() {
+            // This is a simplified version - in a real app, you would have the actual first trading day price
+            const today = new Date();
+            const yearStart = new Date(today.getFullYear(), 0, 1);
+            
+            // Find the first trading day (just use the first available price in our data for this year)
+            for (let i = 0; i < stockData.timestamp.length; i++) {
+                const date = new Date(stockData.timestamp[i] * 1000);
+                if (date >= yearStart) {
+                    return stockData.closes[i];
+                }
+            }
+            
+            // If no data found for this year, use the first price available
+            return stockData.closes[0];
+        }
     </script>
 </body>
-</
 </html>
